@@ -20,7 +20,7 @@ export default function App() {
       <RegisterTop />
       <Text className="mt-7 font-inter-extrabold text-[30px]">Créer ton compte</Text>
       <Text className="mt-2 text-ink-soft font-inter-regular text-[15px]">
-        Rejoins Toctoc en moins d'une minute.
+        Rejoins KiToc en moins d'une minute.
       </Text>
       <RegisterForm />
       <GoogleOrApple />
