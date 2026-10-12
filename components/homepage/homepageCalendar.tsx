@@ -61,20 +61,20 @@ export function HomepageCalendar() {
               <Text className={`text-[10.5px] font-inter-semibold ${estAujourdhui ? "text-violet-deep" : "text-ink-faint"}`}>
                 {nom}
               </Text>
-              <View className={`w-8 h-8 rounded-full items-center justify-center ${estAujourdhui ? "bg-violet/30" : ""}`}>
+              <View className={`w-8 h-8 rounded-full items-center justify-center ${estAujourdhui ? "bg-violet/80" : ""}`}>
                 <Text className={`text-[13px] font-inter-bold ${estAujourdhui ? "text-white" : "text-ink-soft"}`}>
                   {numero}
                 </Text>
               </View>
-              <View className="flex-column -space-x-1">
+              <View className="flex-column gap-1">
                 {jour.child.map((child) => (
                   !child.profilePictureUrl ? (
                     <View
                       key={child.id}
-                      className="w-[12px] h-[12px] rounded-full items-center justify-center"
+                      className="w-[15px] h-[15px] rounded-full items-center justify-center"
                       style={{ backgroundColor: child.avatarColor }}
                     >
-                      <Text className=" text-[5px] text-white font-extrabold">
+                      <Text className=" text-[9px] text-white font-inter-extrabold">
                         {child.firstname.charAt(0)}
                       </Text>
                     </View>
@@ -82,7 +82,7 @@ export function HomepageCalendar() {
                     <Image
                       key={child.id}
                       source={{ uri: child.profilePictureUrl }}
-                      className="h-[12px] w-[12px] rounded-full"
+                      className="h-[15px] w-[15px] rounded-full"
                     />
                   )
                 ))}

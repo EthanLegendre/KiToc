@@ -1,8 +1,8 @@
-import { View, Text } from "react-native";
-import "@/global.css"
+import "@/global.css";
+import { User, fetchUser } from "@/lib/fetch/fetchUser";
+import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { User, fetchUser } from "@/lib/utils/fetchUser";
-import { Ionicons } from "@expo/vector-icons"
+import { Text, View } from "react-native";
 
 export function HomepageClock() {
     const [user, setUser] = useState<User | null>(null);
