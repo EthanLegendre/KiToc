@@ -1,9 +1,9 @@
-import { fetchKid } from "@/lib/kid/fetchKid";
-import { useEffect, useState } from "react";
-import { Modal, Pressable, Text, View, Image } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { addToPlanning } from "@/lib/utils/addToPlanning";
+import { fetchAssmatKids } from "@/lib/fetch/fetchAssmatKids";
+import { handleAddToPlanning } from "@/lib/handle/handleAddToPlanning";
 import { Child } from "@/types/enfant";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useEffect, useState } from "react";
+import { Image, Modal, Pressable, Text, View } from "react-native";
 
 type Props = {
     visible: boolean;
@@ -18,7 +18,7 @@ export function PlanningForm({ visible, date, onClose }: Props) {
     const [indexPick, setIndexPick] = useState(0);
 
     useEffect(() => {
-        fetchKid().then(({ data, error}) => {
+        fetchAssmatKids().then(({ data, error}) => {
             if (data) {
                 setChilds(data);
             }
@@ -102,7 +102,7 @@ export function PlanningForm({ visible, date, onClose }: Props) {
                 </View>
             </View>
             <Pressable
-                onPress={() => {onClose(); addToPlanning(childs[indexPick].id, heureArrivée, heureDepart, date)}}
+                onPress={() => {onClose(); handleAddToPlanning(childs[indexPick].id, heureArrivée, heureDepart, date)}}
                 className="px-8 h-15 rounded-[17px] shadow-lg justify-center items-center mt-8 bg-violet"
             >
                 <Text className="font-bold text-white text-[16px]">Ajouter au planning</Text>
