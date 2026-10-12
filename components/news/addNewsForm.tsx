@@ -1,12 +1,12 @@
-import { View, Text, Modal, Pressable, TextInput, Image } from "react-native";
-import "@/global.css"
-import { useState } from "react";
-import { pickAndUploadPicture } from "@/lib/utils/uploadPicture";
-import { Ionicons } from "@expo/vector-icons"
+import "@/global.css";
+import { fetchActiveSessionKid } from "@/lib/fetch/fetchActiveSessionKid";
+import { handleAddNews } from "@/lib/handle/handleAddNews";
 import { supabase } from "@/lib/supabase";
-import { addNews } from "@/lib/news/addNews";
-import { getSessionByKidId } from "@/lib/session/getSessionByIdKid";
+import { pickAndUploadPicture } from "@/lib/utils/uploadPicture";
 import { uploadVoiceMessage } from "@/lib/utils/uploadVoiceMessage";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import { Image, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { VoiceRecorder } from "./voiceRecoder";
 
 type Props = {
@@ -53,7 +53,7 @@ export function AddNewsForm({ visible, childId, onClose }: Props) {
     async function onPressAjouter() {
         setErrorMessage("");
         setLoading(true);
-        const { data, error } = await getSessionByKidId(childId, "en_cours");
+        const { data, error } = await fetchActiveSessionKid(childId);
         if (error) {
             setErrorMessage(error);
             return;
@@ -62,7 +62,7 @@ export function AddNewsForm({ visible, childId, onClose }: Props) {
             setErrorMessage("L'enfant n'est pas en garde")
             return;
         }
-        const { error: errorAddNews } = await addNews(title, description, photoUrl, audioUrl, typeSelect, data.id)
+        const { error: errorAddNews } = await handleAddNews(title, description, photoUrl, audioUrl, typeSelect, data.id)
         if (errorAddNews) {
             setErrorMessage(errorAddNews);
             return;
@@ -84,7 +84,7 @@ export function AddNewsForm({ visible, childId, onClose }: Props) {
                 <Pressable onPress={(e) => e.stopPropagation()} className="bg-white rounded-t-[26px] w-full flex-column px-6 pt-3 pb-8">
                     <View className="w-10 h-1 bg-[#E5D4FF] rounded-full self-center mb-5" />
                     <View className="flex-row items-center justify-between w-full mb-5">
-                        <Text className="font-inter-bold text-[18px] text-ink">Ajouter une actualité</Text>
+                        <Text className="font-inter-bold text-[18px] text-ink">Ajouter au récap</Text>
                         <Pressable className="w-8 h-8 rounded-full bg-lavender-pale items-center justify-center" onPress={onClose}>
                             <Ionicons name="close-outline" size={18} color="#7A6C8C" />
                         </Pressable>
