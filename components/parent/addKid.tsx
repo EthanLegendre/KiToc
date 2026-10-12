@@ -2,15 +2,16 @@ import { View, Text, Modal, Pressable, TextInput, Image } from "react-native";
 import "@/global.css"
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons"
-import { checkKidExist } from "@/lib/parent/checkKidExist";
-import { addParentKid } from "@/lib/parent/addParentKid";
+import { checkKidExist } from "@/lib/check/checkKidExist";
+import { handleAddParentKid } from "@/lib/handle/handleAddParentKid";
 
 type Props = {
     visible: boolean;
     onClose: () => void;
 }
 
-export function AddKidForm({ visible, onClose }: Props) {
+export function AddKidForm({ visible, onClose }: Props)
+{
     const [invitationCode, setInvitationCode] = useState("");
     const [codePin, setCodePin] = useState("");
     const [kidFound, setKidFound] = useState(false);
@@ -34,7 +35,7 @@ export function AddKidForm({ visible, onClose }: Props) {
     async function onPressJoin() {
         setErrorMessage("");
         setLoading(true);
-        const { error } = await addParentKid(invitationCode, codePin);
+        const { error } = await handleAddParentKid(invitationCode, codePin);
         if (error) {
             setLoading(false)
             setErrorMessage(error);

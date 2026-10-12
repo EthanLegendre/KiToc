@@ -1,15 +1,15 @@
-import { View, Text, Image, Pressable } from "react-native";
-import { Child } from "@/types/enfant";
-import { act, useEffect, useState } from "react";
-import { checkKidInSession } from "@/lib/kid/checkKidInSession";
-import { getSessionByKidId, Session } from "@/lib/session/getSessionByIdKid";
+import { fetchActiveSessionKid } from "@/lib/fetch/fetchActiveSessionKid";
+import { fetchAssmatOfKid } from "@/lib/fetch/fetchAssmatOfKid";
+import { fetchNewsSession } from "@/lib/fetch/fetchNewsSession";
+import { fetchSessionInfoTimeKidMonth } from "@/lib/fetch/fetchSessionInfoTimeKidMonth";
+import { User } from "@/lib/fetch/fetchUser";
 import { calculeTimeHour } from "@/lib/utils/calculeTimeHour";
-import { User } from "@/lib/utils/fetchUser";
-import { getAssmatOfKid } from "@/lib/parent/getAssmatOfKid";
-import { Ionicons } from "@expo/vector-icons";
-import { getInfoTimeKid } from "@/lib/parent/getInfoTimeKid";
+import { Child } from "@/types/enfant";
 import { News } from "@/types/news";
-import { getNewsSession } from "@/lib/news/getNewsSession";
+import { session } from "@/types/session";
+import { Ionicons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
+import { Image, Pressable, Text, View } from "react-native";
 
 type Props = {
     child: Child;
@@ -40,7 +40,7 @@ function getHourMinuteNews(iso: string) {
 }
 
 export function KidInformation({ child }: Props) {
-    const [session, setSession] = useState<Session | null>(null);
+    const [session, setSession] = useState<session | null>(null);
     const [timeSpend, setTimeSpend] = useState("");
     const date = new Date();
     const [assmat, setAssmat] = useState<User | null>(null)
@@ -53,11 +53,11 @@ export function KidInformation({ child }: Props) {
     useEffect(() => {
         setNews(null);
         async function getSession() {
-            const { data, error } = await getSessionByKidId(child.id, "en_cours");
+            const { data, error } = await fetchActiveSessionKid(child.id);
             setSession(data);
             if (data) {
                 const heureActuelle = `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-                setTimeSpend(calculeTimeHour(data.heure_debut, heureActuelle));
+                setTimeSpend(calculeTimeHour(data.start, heureActuelle));
             } else {
                 setTimeSpend("");
             }
@@ -65,7 +65,7 @@ export function KidInformation({ child }: Props) {
         }
 
         async function getAssmat() {
-            const { assmat, error } = await getAssmatOfKid(child.id);
+            const { assmat, error } = await fetchAssmatOfKid(child.id);
             if (error) {
                 console.error(error)
                 return;
@@ -74,14 +74,14 @@ export function KidInformation({ child }: Props) {
         }
 
         async function getInfoTime() {
-            const { totalHour, totalSession, totalMoney} = await getInfoTimeKid(child.id, child.hourlyWageRate, child.dailyAllowance);
+            const { totalHour, totalSession, totalMoney} = await fetchSessionInfoTimeKidMonth(child.id, child.hourlyWageRate, child.dailyAllowance, false);
             setTdg(totalHour);
             setNrbSession(totalSession);
             setTotalMoney(totalMoney);
         }
 
         async function getNews() {
-            const { news, error } = await getNewsSession(child.id);
+            const { news, error } = await fetchNewsSession(child.id);
             if (error) {
                 return;
             }
@@ -112,7 +112,7 @@ export function KidInformation({ child }: Props) {
                             <Text className="text-[#8B8698] font-inter-semibold text-[15px]">Temps de garde aujourd'hui</Text>
                             <Text className="text-[#7C3AED] font-inter-black text-[50px] mt-2">{timeSpend}</Text>
                             <Text className="text-[#8B8698] font-inter-medium  text-[12.5px] mt-2 mb-5">
-                                Arrivée chez {assmat?.prenom} à {session.heure_debut.padStart(2, "0").slice(0, 2)}h{session.heure_debut.padStart(2, "0").slice(3, 5)}
+                                Arrivée chez {assmat?.prenom} à {session.start.padStart(2, "0").slice(0, 2)}h{session.start.padStart(2, "0").slice(3, 5)}
                             </Text>
                             <View className="items-center justify-between w-[88%] border-t-[1px] border-t-[#F0EBF8] px-1 flex-row mt-8 pt-6">
                                 <View className="flex-row items-center">

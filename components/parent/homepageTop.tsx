@@ -1,9 +1,7 @@
-import { View, Text, Pressable } from "react-native";
-import "@/global.css"
+import "@/global.css";
+import { fetchUser, User } from "@/lib/fetch/fetchUser";
 import { useEffect, useState } from "react";
-import { fetchUser, User } from "@/lib/utils/fetchUser";
-import { Ionicons } from "@expo/vector-icons";
-import { AddKidForm } from "./addKid";
+import { Text, View } from "react-native";
 
 type Props = {
     onKidAdded: () => void;
@@ -13,7 +11,6 @@ export function HomepageTop({ onKidAdded }: Props) {
     const date = new Date();
     const datestring = date.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"});
     const [user, setUser] = useState<User | null>(null);
-    const [showForm, setShowForm] = useState(false);
 
     useEffect(() => {
         fetchUser("parent").then(({ data, error }) => {
