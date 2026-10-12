@@ -1,16 +1,16 @@
-import { View, Text, ScrollView, Image, Pressable } from "react-native"
-import { TopLogoParent } from "@/components/parent/topLogo"
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { HomepageTop } from "@/components/parent/homepageTop";
-import { useCallback, useEffect, useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
-import { checkHaveKidParent } from "@/lib/parent/checkHaveKidParent";
-import { KidInformation } from "@/components/parent/kidInformation";
-import { Child } from "@/types/enfant";
-import { getKids } from "@/lib/parent/getKids";
 import { AddKidForm } from "@/components/parent/addKid";
-import { handleSignOut } from "@/lib/utils/handleSignOut";
+import { HomepageTop } from "@/components/parent/homepageTop";
+import { KidInformation } from "@/components/parent/kidInformation";
+import { TopLogoParent } from "@/components/parent/topLogo";
+import { checkParentHaveKid } from "@/lib/check/checkParentHaveKid";
+import { fetchParentKids } from "@/lib/fetch/fetchParentKids";
+import { handleSignOut } from "@/lib/handle/handleSignOut";
+import { Child } from "@/types/enfant";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function App() {
     const insets = useSafeAreaInsets();
@@ -21,14 +21,14 @@ export default function App() {
 
 
     const refreshHaveKid = useCallback(() => {
-        checkHaveKidParent().then(({ haveKidParent }) => {
+        checkParentHaveKid().then(({ haveKidParent }) => {
             setHaveKid(haveKidParent);
         })
     }, []);
 
     useEffect(() => {
         async function getKid() {
-            const { kids } = await getKids();
+            const { kids } = await fetchParentKids();
             if (!kids) return;
             setKids(kids);
         }
