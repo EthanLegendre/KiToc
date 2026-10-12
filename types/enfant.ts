@@ -2,10 +2,10 @@ export type Child = {
     id:                         string;
     assmatId:                   string;
     lastname:                   string;
-    firstname:                  string;
+    firstname:                   string;
     birthDate:                  string;
     avatarColor:                string;
-    profilePictureUrl:          string;
+    profilePictureUrl:           string;
     parentContactLastname:      string;
     parentContactFirstname:     string;
     parentContactEmail:         string;
