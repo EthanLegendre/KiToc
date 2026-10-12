@@ -1,8 +1,8 @@
-import "@/global.css"
-import { router } from 'expo-router'
-import { useEffect } from "react";
+import "@/global.css";
+import { fetchUser } from "@/lib/fetch/fetchUser";
 import { supabase } from "@/lib/supabase";
-import { fetchUser } from "@/lib/utils/fetchUser";
+import { router } from 'expo-router';
+import { useEffect } from "react";
 
 export default function App() {
   useEffect(() => {
