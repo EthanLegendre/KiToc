@@ -1,19 +1,18 @@
 import { TopLogo } from "@/components/topLogo";
 import "@/global.css";
-import { fetchOneKid } from "@/lib/kid/fetchKid";
-import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { Text, View, ScrollView, Pressable, Image, TextInput } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { fetchOneKid } from "@/lib/fetch/fetchOneKid";
+import { handleDeleteKid } from "@/lib/handle/handleDeleteKid";
+import { handleUpdateKid } from "@/lib/handle/handleUpdateKid";
+import { supabase } from "@/lib/supabase";
 import { formatDateInput } from "@/lib/utils/formatDateInput";
 import { formatTelInput } from "@/lib/utils/formatTelInput";
-import { handleUpdateKid } from "@/lib/kid/handleUpdateKid";
-import { supabase } from "@/lib/supabase";
 import { pickAndUploadPicture } from "@/lib/utils/uploadPicture";
-import { handleDeleteKid } from "@/lib/kid/handleDeleteKid";
 import { Child } from "@/types/enfant";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
+import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function getIdColor(color :string) {
   if (color === "#F2559C")
