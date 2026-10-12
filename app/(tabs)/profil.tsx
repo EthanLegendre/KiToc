@@ -1,5 +1,5 @@
 import "@/global.css";
-import { handleSignOut } from "@/lib/utils/handleSignOut";
+import { handleSignOut } from "@/lib/handle/handleSignOut";
 import { Pressable, Text, View } from "react-native";
 
 export default function App() {
