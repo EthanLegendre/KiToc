@@ -1,5 +1,5 @@
 import "@/global.css";
-import { handleAddKid } from "@/lib/kid/handleAddKid";
+import { handleAddKid } from "@/lib/handle/handleAddKid";
 import { supabase } from "@/lib/supabase";
 import { pickAndUploadPicture } from "@/lib/utils/uploadPicture";
 import { formatDateInput } from "@/lib/utils/formatDateInput";
