@@ -1,50 +1,62 @@
-import { handleDeleteKid } from "@/lib/kid/handleDeleteKid";
-import { createSession } from "@/lib/session/createSession";
-import { stopSession } from "@/lib/session/stopSession";
+import { checkKidInSession } from "@/lib/check/checkKidInSession";
+import { handleDeleteKid } from "@/lib/handle/handleDeleteKid";
+import { handleCreateSession } from "@/lib/handle/handleCreateSession";
+import { Child } from "@/types/enfant";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
-import { checkKidInSession } from "@/lib/kid/checkKidInSession";
-import { Child } from "@/types/enfant";
+import { Modal, Pressable, Text, View, TextInput } from "react-native";
 import { AddNewsForm } from "../news/addNewsForm";
+import { checkKidHaveTutor } from "@/lib/check/checkKidHaveTutor";
 
 type Props = {
   child: Child;
   onClose: () => void;
+  onSessionChange?: () => void;
 };
 
-export function KidInfo({ child, onClose }: Props) {
+export function KidInfo({ child, onClose, onSessionChange }: Props) {
   const [isInSession, setIsInSession] = useState(false);
   const [showAddNewsForm, setShowAddNewsForm] = useState(false);
+  const [askPinCode, setAskPinCode] = useState(false);
+  const [codePin, setCodePin] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [haveTutor, setHaveTutor] = useState(false);
 
-  async function handleCreateSession() {
-    const { data, error } = await createSession(child?.id);
+  async function manageSession() {
+    setLoading(true);
+    setErrorMessage("");
+    checkKidInSession(child.id).then((setIsInSession));
+    console.log(isInSession);
+    const { error } = await handleCreateSession(child?.id, isInSession, codePin);
     if (error) {
-      console.error(error);
+      setLoading(false);
+      setErrorMessage(error);
       return;
     }
-    onClose();
-  }
-
-  async function handleStopSession() {
-    const { data, error } = await stopSession(child.id);
-    if (error) {
-      console.error(error);
-      return;
-    }
+    checkKidInSession(child.id).then((setIsInSession));
+    onSessionChange?.();
+    setAskPinCode(false);
+    setLoading(false);
     onClose();
   }
 
   useEffect(() => {
     checkKidInSession(child.id).then((setIsInSession));
+    checkKidHaveTutor(child.id).then(({ error, haveTutor}) => {
+      if (error){
+        console.error(error);
+        return;
+      }
+      setHaveTutor(haveTutor);
+    })
   }, [child.id]);
 
   return (
     <Modal
       visible={!!child}
       transparent
-      animationType="fade"
       onRequestClose={onClose}
     >
       <Pressable
@@ -78,24 +90,22 @@ export function KidInfo({ child, onClose }: Props) {
             {!isInSession ? (
               <Pressable
                 className="flex-row items-center mt-10"
-                onPress={() => {handleCreateSession(); router.replace("/homepage")}}
+                onPress={() => {if (haveTutor) setAskPinCode(true)}}
               >
-                <View className="bg-[#D6E4FA] rounded-[7px] p-3">
-                  <Ionicons name="play" color={"#3B6FD6"} size={16} />
+                <View className={`${haveTutor ? "bg-[#D6E4FA]" : "bg-[#dcddde]"} rounded-[7px] p-3`}>
+                  {haveTutor ? (<Ionicons name="play" color={"#3B6FD6"} size={16} />) : (<Ionicons name="lock-closed"  size={16} />)}
                 </View>
                 <View className="flex-col ml-4">
                   <Text className="font-bold text-[15px]">
                     Lancer une session
                   </Text>
-                  <Text className="text-ink-soft text-[12px] mt-1">
-                    Nécessite le code du parent
-                  </Text>
+                  {haveTutor ? (<Text className="text-ink-soft text-[12px] mt-1">Nécessite le code du parent</Text>) : (<View className="flex-row items-center"><Ionicons name="alert-circle-outline" color={"red"}/><Text className="text-red-400 ml-1 text-[9px] mt-1 font-inter-semibold">Aucun tuteur lié à l'enfant</Text></View>)}
                 </View>
               </Pressable>
             ) : (
               <Pressable
                 className="flex-row items-center mt-10"
-                onPress={() => {handleStopSession(); router.replace("/homepage")}}
+                onPress={() => setAskPinCode(true)}
               >
                 <View className="bg-[#fa8f87] rounded-[7px] p-3">
                   <Ionicons name="stop" color={"white"} size={16} />
@@ -136,7 +146,7 @@ export function KidInfo({ child, onClose }: Props) {
                 <Ionicons name="cube-outline" size={16} color={"#2FAE6B"} />
               </View>
               <View className="flex-col ml-4">
-                <Text className="font-bold text-[15px]">Ajouter une news</Text>
+                <Text className="font-bold text-[15px]">Ajouter au récap</Text>
                 <Text className="text-ink-soft text-[12px] mt-1">
                   Text, vocal ou photo
                 </Text>
@@ -181,6 +191,20 @@ export function KidInfo({ child, onClose }: Props) {
       </Pressable>
       {showAddNewsForm && (
         <AddNewsForm visible={showAddNewsForm} childId={child.id} onClose={() => setShowAddNewsForm(false)}></AddNewsForm>
+      )}
+      {askPinCode && (
+        <Modal visible={!!child} transparent animationType="fade" onRequestClose={onClose}>
+          <Pressable style={{ backgroundColor: "rgba(0,0,0,0.5)" }} className="flex-1 items-center justify-center" onPress={onClose}>
+            <View className="items-center bg-white rounded-[20px] px-5">
+              <Text className="font-inter-bold text-[25px] mt-5">Code pin</Text>
+              <Text className="text-ink-faint font-inter-semibold">Entrez le code pin assigné pour l'enfant</Text>
+              <Ionicons className="mt-2" name="lock-closed" size={20}></Ionicons>
+              <TextInput keyboardType="numeric" secureTextEntry={true} autoCapitalize="characters" value={codePin.slice(0, 4)} onChangeText={setCodePin} style={{ textAlign: "center"}} className="h-20 mt-8 tracking-[20px] text-[25px] bg-[#fafafa] border-[#dedede] border-1 w-2/4 rounded-[18px] font-inter-bold" placeholder="2435"></TextInput>
+              {errorMessage && (<Text className="text-red-500 font-inter-semibold">{errorMessage}</Text>)}
+              <Pressable className="bg-[#9e68fc] w-[200px] h-15 shadow-xl mb-10 mt-5 justify-center items-center rounded-[20px]" onPress={() => manageSession()}><Text className="font-bold text-white">{loading ? "Chargement ..." : "Valider"}</Text></Pressable>
+            </View>
+        </Pressable>
+      </Modal>
       )}
     </Modal>
   );
