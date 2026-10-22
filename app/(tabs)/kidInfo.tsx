@@ -1,4 +1,12 @@
+import { Ionicons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
+import { Image, Pressable, ScrollView, Text, View, ActivityIndicator } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { TopLogo } from "@/components/topLogo";
+
 import { fetchActiveSessionKid } from "@/lib/fetch/fetchActiveSessionKid";
 import { fetchKidSessions } from "@/lib/fetch/fetchKidSessions";
 import { fetchOneKid } from "@/lib/fetch/fetchOneKid";
@@ -7,18 +15,14 @@ import { fetchSessionInfoTimeKidMonth } from "@/lib/fetch/fetchSessionInfoTimeKi
 import { fetchSessionInfoTimeKidTotal } from "@/lib/fetch/fetchSessionInfoTimeKidTotal";
 import { fetchSessionInfoTimeKidWeek } from "@/lib/fetch/fetchSessionInfoTimeKidWeek";
 import { fetchSessionInfoTimeKidYear } from "@/lib/fetch/fetchSessionInfoTimeKidYear";
-import { Child } from "@/types/enfant";
-import { session } from "@/types/session";
-import { Ionicons } from "@expo/vector-icons";
-import * as Clipboard from "expo-clipboard";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { calculeTimeHour, calculeTimeMinute } from "@/lib/utils/calculeTimeHour"
 import { SHORT_MONTH } from "@/lib/constants"
 
-export default function App() {
+import { Child } from "@/types/enfant";
+import { session } from "@/types/session";
+
+
+export default function KidInfoPage() {
   const insets = useSafeAreaInsets();
   const [child, setChild] = useState<Child | null>(null);
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -33,6 +37,8 @@ export default function App() {
   const [photoTab, setPhotoTab] = useState<string[] | null>([]);
   const [sessions, setSessions] = useState<session[] | null>(null)
   const [nbrSessionToShow, setNbrSessionToShow] = useState(5);
+  const [loadingData, setLoadingData] = useState(true);
+  const [loadingFetchKid, setLoadingFetchKid] = useState(true);
 
   async function copyToClipboard(text: string) {
     await Clipboard.setStringAsync(text);
@@ -42,11 +48,12 @@ export default function App() {
     setNbrSessionToShow(5);
     setIsCopy(false);
     if (!id) return;
+    setLoadingFetchKid(true)
     fetchOneKid(id).then(({ data, error }) => {
       setChild(data);
       if (error) console.error(error);
+      setLoadingFetchKid(false);
     });
-
   }, [id]);
 
   useEffect(() => {
@@ -93,11 +100,16 @@ export default function App() {
       const {totalHour, totalSession, totalMoney} = await  fetchSessionInfoTimeKidMonth(child.id, child.hourlyWageRate, child.dailyAllowance, true);
       setMonthMoney(totalMoney)
     }
-    if (timeSelectId === 1) getInfoMonth();
-    if (timeSelectId === 0) getInfoWeek();
-    if (timeSelectId === 2) getInfoYear();
-    if (timeSelectId === 3) getInfoTotal();
-    getMonthMoney();
+    async function check() {
+      setLoadingData(true);
+      if (timeSelectId === 1) await getInfoMonth();
+      if (timeSelectId === 0) await getInfoWeek();
+      if (timeSelectId === 2) await getInfoYear();
+      if (timeSelectId === 3) await getInfoTotal();
+      await getMonthMoney();
+      setLoadingData(false);
+    }
+    check();
   }, [timeSelectId, child])
 
   useEffect(() => {
@@ -115,7 +127,7 @@ export default function App() {
     if (!child) return;
     fetchKidSessions(child.id).then(({ data, error}) => {
       if (error) {
-        console.error(error);
+        console.error(error)
         return;
       }
       if (data) {
@@ -126,63 +138,41 @@ export default function App() {
     })
   }, [child])
 
-  if (!child) {
-    return null;
-  }
-
-  console.log(sessions);
+  if (!child) return null;
 
   return (
-    <ScrollView
-      style={{ paddingTop: insets.top }}
-      className="flex-1 bg-white"
-      contentContainerStyle={{ paddingHorizontal: 0, paddingBottom: 40 }}
-    >
+    <ScrollView style={{ paddingTop: insets.top }} className="flex-1 bg-white" contentContainerStyle={{ paddingHorizontal: 0, paddingBottom: 40 }}>
       <View className="mx-7">
-        <TopLogo></TopLogo>
+        <TopLogo/>
         <View className="flex-row items-center justify-between mt-10">
-          <Pressable
-            className="bg-[#ffffff] rounded-full p-4 border-1 border-[#E5D4FF]"
-            onPress={() => router.push("/homepage")}
-          >
+          <Pressable className="bg-[#ffffff] rounded-full p-4 border-1 border-[#E5D4FF]" onPress={() => router.push("/homepage")}>
             <Ionicons name="arrow-back-outline" size={15} color="#5B21B6" />
           </Pressable>
-          <Pressable
-            className="flex-row items-center bg-white py-2.5 px-5 rounded-[5px] border-1 border-[#E5D4FF]"
-            onPress={() => {
-              router.replace(`/editKid?id=${child.id}`);
-            }}
-          >
-            <Ionicons
-              name="create-outline"
-              color={"#5B21B6"}
-              size={17}
-            ></Ionicons>
+          <Pressable className="flex-row items-center bg-white py-2.5 px-5 rounded-[5px] border-1 border-[#E5D4FF]" onPress={() => {router.replace(`/editKid?id=${child.id}`)}}>
+            <Ionicons name="create-outline" color={"#5B21B6"} size={17}></Ionicons>
             <Text className="ml-2 text-[#5B21B6] font-inter-bold text-[15px] ">Modifier</Text>
           </Pressable>
         </View>
       </View>
       <View className="flex-column justify-center items-center py-10">
         {!child.profilePictureUrl ? (
-          <View
-            className="w-[150px] h-[150px] rounded-full items-center justify-center shadow-lg border-4 border-white"
-            style={{ backgroundColor: child.avatarColor }}
-          >
-            <Text className="text-white text-[55px] font-bold">
-              {child.firstname.charAt(0)}
-            </Text>
+          <View className="w-[150px] h-[150px] rounded-full items-center justify-center shadow-lg border-4 border-white" style={{ backgroundColor: child.avatarColor }}>
+            <Text className="text-white text-[55px] font-bold">{child.firstname.charAt(0)}</Text>
           </View>
         ) : (
-          <Image
-            source={{ uri: child.profilePictureUrl }}
-            className="h-[150px] w-[150px] rounded-full border-4 border-white shadow-lg"
-          ></Image>
+          <Image source={{ uri: child.profilePictureUrl }} className="h-[150px] w-[150px] rounded-full border-4 border-white shadow-lg"></Image>
         )}
         <View className="flex-row gap-1 mt-3">
-          <Text className="font-inter-extrabold text-[25px] mr-3">{child.firstname}</Text>
-          <Text className="font-inter-extrabold text-[25px]">{child.lastname}</Text>
+          {loadingFetchKid ? (
+            <ActivityIndicator/>
+          ) : (
+            <View className="flex-row">
+              <Text className="font-inter-extrabold text-[25px] mr-3">{child.firstname}</Text>
+              <Text className="font-inter-extrabold text-[25px]">{child.lastname}</Text>
+            </View>
+          )}
         </View>
-        <Text className="text-ink-soft font-inter-regular mt-2">Ajouté le: {child.createdAt.slice(0, 10)}</Text>
+        {!loadingFetchKid && <Text className="text-ink-soft font-inter-regular mt-2">Ajouté le: {child.createdAt.slice(0, 10)}</Text>}
         {session && (
           <View className="bg-[#E8F7EF] flex-row items-center justify-center mt-7 px-10 py-4 rounded-[14px] border-1 border-[#2FAE6B] mt-3">
             <View className="h-3 w-3 bg-[#2FAE6B] rounded-full mr-3"></View>
@@ -203,25 +193,25 @@ export default function App() {
 
         <View className="border-t-ink-faint border-t-1 border-b-ink-faint border-b-1 py-5 mt-5 flex-row justify-around bg-white rounded">
              <View className="flex-column items-center border-r-1 border-r-ink-faint w-1/3 py-3">
-                <Text className="font-inter-black text-[18px]">{tdg}</Text>
+                {loadingData ? (<ActivityIndicator color={"black"}/>) : (<Text className="font-inter-black text-[18px]">{tdg}</Text>)}
                 <Text className="font-inter-regular text-center text-ink-faint text-[10px]">Temps de garde</Text>
               </View>
             <View className="flex-column items-center w-1/3 py-3">
-                <Text className="font-inter-black text-[18px]">{nbrSession}</Text>
+                {loadingData ? (<ActivityIndicator color={"black"}/>) : (<Text className="font-inter-black text-[18px]">{nbrSession}</Text>)}
                 <Text className=" font-inter-regular text-[10px] text-center text-ink-faint">Sessions de garde</Text>
             </View>
            <View className="flex-column items-center w-1/3 border-l-1 border-ink-faint py-3">
-                <Text className="font-inter-black text-[18px]">{revenus} €</Text>
+                {loadingData ? (<ActivityIndicator color={"black"}/>) : (<Text className="font-inter-black text-[18px]">{revenus}€</Text>)}
                 <Text className="font-inter-regular text-[10px] text-center text-ink-faint">Montant</Text>
             </View>
         </View>
 
         <View className="w-full justify-center mr-5">
           <Text className="font-inter-bold mt-15 ml-5 text-[16px]">REVENUE CE MOIS</Text>
-          <View className="mt-7 flex-row justify-between items-center">
+          {loadingFetchKid ? (<ActivityIndicator/>) : (<View className="mt-7 flex-row justify-between items-center">
             <Text className="text-[#2FAE6B] font-black text-[30px] ml-5">+{monthMoney.split(".")[0]}<Text className="font-semibold text-[17px]">,{monthMoney.split(".")[1]?.slice(0, 2)}€</Text></Text>
             <Text className="text-violet-deep font-inter-extrabold mr-4">{child.hourlyWageRate.toFixed(2)} €/h - {child.dailyAllowance.toFixed(2)} €/j</Text>
-          </View>
+          </View>)}
         </View>
 
         <View className="w-full mt-7">
@@ -229,39 +219,22 @@ export default function App() {
         </View>
         <View className="w-full pl-5 pr-5">
           <View className="flex-column mt-10 w-full py-3 bg-[#F2ECFB] rounded-[13px] shadow-lg">
-            <Text className="text-[#5B21B6] font-bold mt-2 ml-3 text-[17px]">
-              Code parent
-            </Text>
+            <Text className="text-[#5B21B6] font-bold mt-2 ml-3 text-[17px]">Code parent</Text>
             <View className="flex-row justify-between mt-4 items-center">
-              <Text className="tracking-[10px] font-extrabold text-[25px] ml-3">
-                {child.invitationCode}
-              </Text>
-              <Pressable
-                onPress={() => {
-                  setIsCopy(true);
-                  copyToClipboard(child.invitationCode);
-                }}
-              >
+             {loadingFetchKid ? (
+                <ActivityIndicator/>
+              ) : (
+                <Text className="tracking-[10px] font-extrabold text-[25px] ml-3">{child.invitationCode}</Text>
+              )}
+              <Pressable onPress={() => {setIsCopy(true); copyToClipboard(child.invitationCode)}}>
                 {!isCopy ? (
-                  <Ionicons
-                    name="copy-outline"
-                    className="bg-white mr-3 p-4 rounded-full border-1 border-[#5B21B6]"
-                    size={20}
-                  ></Ionicons>
+                  <Ionicons name="copy-outline" className="bg-white mr-3 p-4 rounded-full border-1 border-[#5B21B6]" size={20}></Ionicons>
                 ) : (
-                  <Ionicons
-                    name="checkmark-outline"
-                    className="bg-white mr-3 p-4 rounded-full border-1 border-[#5B21B6]"
-                    size={20}
-                  ></Ionicons>
+                  <Ionicons name="checkmark-outline" className="bg-white mr-3 p-4 rounded-full border-1 border-[#5B21B6]" size={20}></Ionicons>
                 )}
               </Pressable>
             </View>
-            {isCopy && (
-              <Text className="text-[#] ml-[40%] text-[10px] font-bold">
-                Copier !
-              </Text>
-            )}
+            {isCopy && (<Text className="text-[#] ml-[40%] text-[10px] font-bold">Copier !</Text>)}
           </View>
         </View>
       </View>
@@ -292,12 +265,7 @@ export default function App() {
       {photoTab && (
         <View className="flex-row flex-wrap mt-7">
           {photoTab.map((photoUrl, index) => (
-            <Image
-              key={`${photoUrl}-${index}`}
-              source={{ uri: photoUrl }}
-              className="w-1/3 h-1 aspect-square"
-              resizeMode="cover"
-            />
+            <Image key={`${photoUrl}-${index}`} source={{ uri: photoUrl }} className="w-1/3 h-1 aspect-square" resizeMode="cover"/>
           ))}
         </View>
       )}
@@ -318,14 +286,14 @@ export default function App() {
         {sessions ? (
           <View>
             {sessions.slice(0, nbrSessionToShow).map((session, index) => (
-              <View>
+              <View key={index} >
                 {session.status === "terminée" && (
                   <View className="bg-white border-t-1 border-ink-soft items-center py-4">
                     <View className="flex-row justify-between w-full">
                         <View className="flex-row ml-5 w-2/5 justify-between items-center">
                           <View>
                             <Text className="font-inter-bold text-[17px]">{session.date.slice(8)} {SHORT_MONTH[parseInt(session.date.split("-")[1], 10) - 1]}.</Text>
-                            <Text className="font-inter-semibold text-ink-soft text-[14px] mt-1">Mer.</Text>
+                            <Text className="font-inter-semibold text-ink-soft text-[14px] mt-1">2026.</Text>
                           </View>
                           {(session.start && session.end) && (
                             <Text className="text-ink-soft font-inter-semibold text-[12px]">{session.start.slice(0, 5)} - {session.end.slice(0, 5)}</Text>
@@ -342,9 +310,7 @@ export default function App() {
             ))}
             {nbrSessionToShow < (sessions?.length ?? 0)  && (
               <Pressable className="mt-3  flex-row h-14 justify-center  items-center rounded-[14px] border-[1.5px] border-ink-faint mb-4" style={{ borderStyle: "dashed" }} onPress={() => {setNbrSessionToShow(nbrSessionToShow + 5); console.log(nbrSessionToShow)}}>
-                <Text className="font-inter-semibold text-[15px] text-violet-deep">
-                  Voir plus
-                </Text>
+                <Text className="font-inter-semibold text-[15px] text-violet-deep">Voir plus</Text>
               </Pressable>
             )}
         </View>

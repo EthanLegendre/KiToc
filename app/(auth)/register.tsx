@@ -9,7 +9,8 @@ import { RegisterTop } from "@/components/register/registerTop";
 import { RegisterForm } from "@/components/register/registerForm";
 import { GoogleOrApple } from "@/components/googleOrApple";
 
-export default function App() {
+
+export default function RegisterPage() {
   const insets = useSafeAreaInsets();
 
   return (

@@ -1,5 +1,4 @@
 import { Stack } from "expo-router";
-import '@/global.css'
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold, Inter_800ExtraBold, Inter_900Black } from '@expo-google-fonts/inter';
 
 export default function RootLayout() {
@@ -11,9 +10,7 @@ export default function RootLayout() {
     Inter_900Black,
   });
 
-  if (!fontsLoaded) {
-    return null;
-  }
+  if (!fontsLoaded) return null;
 
   return (
     <Stack screenOptions={{ headerShown: false }} />
