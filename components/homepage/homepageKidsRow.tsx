@@ -10,7 +10,7 @@ import { session } from "@/types/session";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
 
 type Props = {
   child: Child;
@@ -99,29 +99,34 @@ export function HomepageKidsRow() {
   const [activeChild, setActiveChild] = useState<Child | null>(null);
   const [nbrEnfantInSession, setNbrEnfantInSession] = useState(0);
   const [refreshTriger, setRefreshTriger] = useState(0);
-
+  const [loadingFetchNbrKidsSesison, setLoadingFetchNbrKidsSesison] = useState(true);
+  const [loadingFetchKids, setLoadingFetchKids] = useState(true);
 
   useEffect(() => {
     fetchAssmatKids().then(({ data, error }) => {
+      setLoadingFetchKids(true);
       if (data) {
         setChilds(data);
       }
       if (error) {
         console.error(error);
       }
+      setLoadingFetchKids(false);
     });
   }, []);
 
   useEffect(() => {
     fetchNbrKidInSession().then(({ count, error}) => {
+      setLoadingFetchNbrKidsSesison(true);
       if (count) {
         setNbrEnfantInSession(count);
       }
       if (error) {
         console.error(error);
       }
+      setLoadingFetchNbrKidsSesison(false)
     })
-  }, [])
+  }, [refreshTriger])
 
   function handleRefresh() {
     setRefreshTriger(refreshTriger + 1);
@@ -134,11 +139,11 @@ export function HomepageKidsRow() {
             <Text className="font-inter-bold text-[16px] text-ink mt-7 text-[23px]">Les enfants</Text>
             <Text className="font-inter-semibold text-ink-faint text-[13px]">La journée en un coup d'oeil</Text>
           </View>
-          <Text className={`font-inter-semibold text-[10px] ${nbrEnfantInSession ? "text-[#1F7A4A]" : "text-[#cc58b5]"} rounded-full mt-7 px-4 py-2 ${nbrEnfantInSession ? "bg-[#E3F5EA]" : "bg-[#F5D5E8]"}`}><Text className={`font-inter-black text-[12px] ${nbrEnfantInSession ? "text-[#1F7A4A]" : "text-[#cc58b5]"}`}>{nbrEnfantInSession}</Text>{"  "}en garde</Text>
+          {loadingFetchNbrKidsSesison ? (<ActivityIndicator/>) : (<Text className={`font-inter-semibold text-[10px] ${nbrEnfantInSession ? "text-[#1F7A4A]" : "text-[#cc58b5]"} rounded-full mt-7 px-4 py-2 ${nbrEnfantInSession ? "bg-[#E3F5EA]" : "bg-[#F5D5E8]"}`}><Text className={`font-inter-black text-[12px] ${nbrEnfantInSession ? "text-[#1F7A4A]" : "text-[#cc58b5]"}`}>{nbrEnfantInSession}</Text>{"  "}en garde</Text>)}
         </View>
-      {childs.map((child) => (
+      {loadingFetchKids ? (<ActivityIndicator/>) : (childs.map((child) => (
         <KidRow key={child.id} child={child} onPress={() => setActiveChild(child)} refreshTriger={refreshTriger}/>
-      ))}
+      )))}
 
       <Pressable
         className="mt-6 flex-row h-14 justify-center ml-6 mr-6 items-center rounded-[14px] border-[1.5px] border-ink-faint mb-4"

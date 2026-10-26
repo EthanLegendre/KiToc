@@ -8,10 +8,11 @@ import { Image, Modal, Pressable, Text, View } from "react-native";
 type Props = {
     visible: boolean;
     date: Date;
+    onPlanningChange?: () => void;
     onClose: () => void;
 };
 
-export function PlanningForm({ visible, date, onClose }: Props) {
+export function PlanningForm({ visible, date, onPlanningChange, onClose }: Props) {
     const [childs, setChilds] = useState<Child[]>([]);
     const [heureArrivée, setHeureArrivée] = useState<Date>(new Date())
     const [heureDepart, setHeureDepart] = useState<Date>(new Date())
@@ -32,82 +33,79 @@ export function PlanningForm({ visible, date, onClose }: Props) {
         return;
     }
 
-    return (
-    <Modal
-      visible={true}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-        <Pressable
-            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-            className="flex-1 items-center justify-center"
-            onPress={onClose}
-        >
-        </Pressable>
-        <View className="bg-white rounded pb-20 pt-5 px-10">
-            <Text className="text-[40px] font-bold">{date.toLocaleDateString("fr-FR")}:</Text>
-            <Text className="font-semibold text-[15px] py-5">Selectionner un enfant :</Text>
-            <View className="flex-row gap-20 mt-2 flex-wrap justify-center">
-                {childs.map((child, index) => (
-                    <Pressable key={index} onPress={() => setIndexPick(index)}>
-                        <View className={`border-1 pt-2 px-3 rounded-[10px] pb-3 shadow-lg flex-column items-center ${index === indexPick ? "border-violet bg-lavender-pale" : "border-ink-faint"}`}>
-                                {!child.profilePictureUrl ? (
-                                    <View
-                                    className="w-[80px] h-[80px] rounded-full items-center justify-center"
-                                    style={{ backgroundColor: child.avatarColor }}
-                                    >
-                                        <Text className="text-white font-extrabold">
-                                            {child.firstname.charAt(0)}
-                                        </Text>
-                                    </View>
-                                    ) : (
-                                    <Image
-                                    source={{ uri: child.profilePictureUrl }}
-                                    className="h-[80px] w-[80px] rounded-full">
-                                    </Image>
-                                )}
-                                <Text className="mt-3 font-semibold">{child.firstname}</Text>
-                                <Text>{child.lastname}</Text>
-                        </View>
-                    </Pressable>
-                ))}
-            </View>
-            <View className="flex-row">
-                <View className="flex-column justify-center items-center mt-10">
-                    <Text className="font-bold text">Heure d'arrivée:</Text>
-                    <DateTimePicker
-                        value={heureArrivée}
-                        mode="time"
-                        is24Hour={true}
-                        display="spinner"
-                        onChange={(event, date) => {
-                            if (date) setHeureArrivée(date);
-                        }}
-                        style={{ transform: [{ scale: 0.8 }] }}
-                    />
-                </View>
-                <View className="flex-column justify-center items-center mt-10">
-                    <Text className="font-bold text">Heure de départ:</Text>
-                    <DateTimePicker
-                        value={heureDepart}
-                        mode="time"
-                        is24Hour={true}
-                        display="spinner"
-                        onChange={(event, date) => {
-                            if (date) setHeureDepart(date);
-                        }}
-                        style={{ transform: [{ scale: 0.8 }] }}
-                    />
-                </View>
-            </View>
-            <Pressable
-                onPress={() => {onClose(); handleAddToPlanning(childs[indexPick].id, heureArrivée, heureDepart, date)}}
-                className="px-8 h-15 rounded-[17px] shadow-lg justify-center items-center mt-8 bg-violet"
-            >
-                <Text className="font-bold text-white text-[16px]">Ajouter au planning</Text>
+    async function onPressAdd() {
+      if (!childs[indexPick]) return;
+      await handleAddToPlanning(childs[indexPick].id, heureArrivée, heureDepart, date);
+      onPlanningChange?.();
+      onClose();
+    }
+
+return (
+  <Modal visible={true} transparent onRequestClose={onClose}>
+    <Pressable style={{ backgroundColor: "rgba(0,0,0,0.5)" }} className="flex-1 items-center justify-center" onPress={onClose}>
+      <Pressable onPress={(e) => e.stopPropagation()} className="bg-white rounded-3xl w-[92%] px-5 pt-6 pb-6">
+        <Text className="text-[28px] font-bold">
+          {date.toLocaleDateString("fr-FR")}
+        </Text>
+        <Text className="font-semibold text-[15px] py-4">
+          Selectionner un enfant :
+        </Text>
+
+        <View className="flex-row gap-3 flex-wrap justify-center">
+          {childs.map((child, index) => (
+            <Pressable key={child.id} onPress={() => setIndexPick(index)}>
+              <View className={`border-1 pt-2 px-3 pb-3 rounded-[10px] items-center ${index === indexPick ? "border-violet bg-lavender-pale" : "border-ink-faint"}`}>
+                {!child.profilePictureUrl ? (
+                  <View className="w-[64px] h-[64px] rounded-full items-center justify-center" style={{ backgroundColor: child.avatarColor }}>
+                    <Text className="text-white font-extrabold">
+                      {child.firstname.charAt(0)}
+                    </Text>
+                  </View>
+                ) : (
+                  <Image source={{ uri: child.profilePictureUrl }} className="h-[64px] w-[64px] rounded-full"/>
+                )}
+                <Text className="mt-2 font-semibold">{child.firstname}</Text>
+                <Text className="text-[12px]">{child.lastname}</Text>
+              </View>
             </Pressable>
+          ))}
         </View>
-    </Modal>
-  );
-}
+
+        <View className="flex-row mt-6">
+          <View className="flex-1 items-center">
+            <Text className="font-bold text-[14px] mb-5">Heure d'arrivée</Text>
+            <DateTimePicker
+              value={heureArrivée}
+              mode="time"
+              is24Hour={true}
+              onChange={(event, picked) => {
+                if (picked) setHeureArrivée(picked);
+              }}
+            />
+          </View>
+
+          <View className="flex-1 items-center">
+            <Text className="font-bold text-[14px] mb-5">Heure de départ</Text>
+            <DateTimePicker
+              value={heureDepart}
+              mode="time"
+              is24Hour={true}
+              onChange={(event, picked) => {
+                if (picked) setHeureDepart(picked);
+              }}
+            />
+          </View>
+        </View>
+
+        <Pressable
+          onPress={() => {onPressAdd()}}
+          className="h-14 rounded-[17px] justify-center items-center mt-6 bg-violet"
+        >
+          <Text className="font-bold text-white text-[16px]">
+            Ajouter au planning
+          </Text>
+        </Pressable>
+      </Pressable>
+    </Pressable>
+  </Modal>
+)}

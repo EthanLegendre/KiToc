@@ -8,7 +8,8 @@ export type User = {
     created_at: string;
     telephone: string | null;
     updated_at: string;
-    
+    notif_token: string | null;
+
 };
 
 export async function fetchUser(role: "assmat" | "parent"): Promise<{ data: User | null; error: string | null }> {

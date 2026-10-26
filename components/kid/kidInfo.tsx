@@ -5,7 +5,7 @@ import { Child } from "@/types/enfant";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Modal, Pressable, Text, View, TextInput } from "react-native";
+import { Modal, Pressable, Text, View, TextInput, ActivityIndicator } from "react-native";
 import { AddNewsForm } from "../news/addNewsForm";
 import { checkKidHaveTutor } from "@/lib/check/checkKidHaveTutor";
 
@@ -92,14 +92,14 @@ export function KidInfo({ child, onClose, onSessionChange }: Props) {
                 className="flex-row items-center mt-10"
                 onPress={() => {if (haveTutor) setAskPinCode(true)}}
               >
-                <View className={`${haveTutor ? "bg-[#D6E4FA]" : "bg-[#dcddde]"} rounded-[7px] p-3`}>
-                  {haveTutor ? (<Ionicons name="play" color={"#3B6FD6"} size={16} />) : (<Ionicons name="lock-closed"  size={16} />)}
+                <View className={`${haveTutor ? "bg-[#D6E4FA]" : "bg-[#D6E4FA]"} rounded-[7px] p-3`}>
+                  {haveTutor ? (<Ionicons name="play" color={"#3B6FD6"} size={16} />) : (<Ionicons name="lock-closed"  size={16} style={{opacity: 0.50}}/>)}
                 </View>
                 <View className="flex-col ml-4">
                   <Text className="font-bold text-[15px]">
                     Lancer une session
                   </Text>
-                  {haveTutor ? (<Text className="text-ink-soft text-[12px] mt-1">Nécessite le code du parent</Text>) : (<View className="flex-row items-center"><Ionicons name="alert-circle-outline" color={"red"}/><Text className="text-red-400 ml-1 text-[9px] mt-1 font-inter-semibold">Aucun tuteur lié à l'enfant</Text></View>)}
+                  {haveTutor ? (<Text className="text-ink-soft text-[12px] mt-1">Nécessite le code du parent</Text>) : (<View className="flex-row items-center mt-1"><Ionicons name="alert-circle-outline" /><Text className="text-ink-faint ml-1 text-[9px] font-inter-semibold">Aucun tuteur lié à l'enfant</Text></View>)}
                 </View>
               </Pressable>
             ) : (
@@ -141,15 +141,13 @@ export function KidInfo({ child, onClose, onSessionChange }: Props) {
                 </Text>
               </View>
             </Pressable>
-            <Pressable className="flex-row items-center mt-10" onPress={() => setShowAddNewsForm(true)}>
+            <Pressable className="flex-row items-center mt-10" onPress={() => {isInSession && setShowAddNewsForm(true)}}>
               <View className="bg-[#E8F7EF] rounded-[7px] p-3">
-                <Ionicons name="cube-outline" size={16} color={"#2FAE6B"} />
+                {isInSession ? (<Ionicons name="cube-outline" size={16} color={"#2FAE6B"}/>) : (<Ionicons name="lock-closed" size={16} style={{opacity: 0.50}}/>)}
               </View>
               <View className="flex-col ml-4">
                 <Text className="font-bold text-[15px]">Ajouter au récap</Text>
-                <Text className="text-ink-soft text-[12px] mt-1">
-                  Text, vocal ou photo
-                </Text>
+                {isInSession ? (<Text className="text-ink-soft text-[12px] mt-1">Text, vocal ou photo</Text>) : (<View className="flex-row items-center mt-1"><Ionicons name="alert-circle-outline"  size={10}/><Text className="text-ink-faint  ml-1 text-[9px] font-inter-semibold">Aucune session lancée pour cet enfant</Text></View>)}
               </View>
             </Pressable>
             <Pressable className="flex-row items-center mt-10 border-b-[1px] pb-6 border-b-[#EFE3F3]" onPress={() => {router.replace(`/editKid?id=${child.id}`); onClose()}}>
@@ -190,7 +188,7 @@ export function KidInfo({ child, onClose, onSessionChange }: Props) {
         )}
       </Pressable>
       {showAddNewsForm && (
-        <AddNewsForm visible={showAddNewsForm} childId={child.id} onClose={() => setShowAddNewsForm(false)}></AddNewsForm>
+        <AddNewsForm visible={showAddNewsForm} kidId={child.id} onClose={() => setShowAddNewsForm(false)}></AddNewsForm>
       )}
       {askPinCode && (
         <Modal visible={!!child} transparent animationType="fade" onRequestClose={onClose}>
@@ -199,9 +197,9 @@ export function KidInfo({ child, onClose, onSessionChange }: Props) {
               <Text className="font-inter-bold text-[25px] mt-5">Code pin</Text>
               <Text className="text-ink-faint font-inter-semibold">Entrez le code pin assigné pour l'enfant</Text>
               <Ionicons className="mt-2" name="lock-closed" size={20}></Ionicons>
-              <TextInput keyboardType="numeric" secureTextEntry={true} autoCapitalize="characters" value={codePin.slice(0, 4)} onChangeText={setCodePin} style={{ textAlign: "center"}} className="h-20 mt-8 tracking-[20px] text-[25px] bg-[#fafafa] border-[#dedede] border-1 w-2/4 rounded-[18px] font-inter-bold" placeholder="2435"></TextInput>
+              <TextInput keyboardType="numeric" secureTextEntry={true} autoCapitalize="characters" value={codePin.slice(0, 4)} onChangeText={setCodePin} style={{ textAlign: "center"}} className="h-20 pl-5 mt-8 tracking-[20px] text-[25px] bg-[#fafafa] border-[#dedede] border-1 w-2/4 rounded-[18px] font-inter-bold" placeholder="2435"></TextInput>
               {errorMessage && (<Text className="text-red-500 font-inter-semibold">{errorMessage}</Text>)}
-              <Pressable className="bg-[#9e68fc] w-[200px] h-15 shadow-xl mb-10 mt-5 justify-center items-center rounded-[20px]" onPress={() => manageSession()}><Text className="font-bold text-white">{loading ? "Chargement ..." : "Valider"}</Text></Pressable>
+             <Pressable className="bg-[#9e68fc] w-[200px] h-15 shadow-xl mb-10 mt-5 justify-center items-center rounded-[20px]" onPress={() => manageSession()}><Text className="font-bold text-white">{loading ? <ActivityIndicator color={"#ffffff"}/> : "Valider"}</Text></Pressable>
             </View>
         </Pressable>
       </Modal>

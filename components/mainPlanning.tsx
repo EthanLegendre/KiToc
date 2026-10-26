@@ -16,6 +16,7 @@ export function MainPlanning() {
     const [weekKid, setWeekKid] = useState<PlanningDay[] | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [dateForm, setDateForm] = useState<Date>(new Date());
+    const [refresh, setRefresh] = useState(0);
 
     useEffect(() => {
         fetchWeekKidPlanning(debut, fin).then(({ data, error }) => {
@@ -36,19 +37,23 @@ export function MainPlanning() {
         setReferenceDate(newDate);
     }
 
+    function handleRefresh() {
+      setRefresh(refresh + 1);
+    }
+
     useEffect(() => {
         fetchWeekKidPlanning(debut, fin).then(({ data, error }) => {
         if (data) setWeekKid(data);
         if (error) console.error(error);
         });
-    }, []);
+    }, [refresh]);
 
   useEffect(() => {
     fetchWeekKidPlanning(debut, fin).then(({ data, error }) => {
       if (data) setWeekKid(data);
       if (error) console.error(error);
     });
-  }, []);
+  }, [refresh]);
 
   const planningParJour = weekKid ? groupPlanningByDay(weekKid, week) : [];
 
@@ -58,7 +63,7 @@ export function MainPlanning() {
             <Pressable className="h-[40px] w-[40px] bg-white rounded-full flex-row items-center justify-center mr-7" onPress={() => semainePrecedente()}>
                 <Ionicons name="arrow-back-outline" size={20}></Ionicons>
             </Pressable>
-            <Text className="text-white font-bold mx-5">
+            <Text className="text-white font-inter-bold text-[20px] mx-5">
                 {week[0].getDate()} - {week[6].getDate()} {week[6].toLocaleDateString("fr-FR", { month: "long"})}
             </Text>
             <Pressable className="h-[40px] w-[40px] bg-white rounded-full flex-row items-center justify-center ml-7" onPress={() => semaineSuivante()}>
@@ -76,15 +81,11 @@ export function MainPlanning() {
             <View key={index} className={`w-1/2 border-r-[1px] border-b-[1px] border-[#E5D4FF] px-4 py-5 ${estAujourdhui ? "bg-lavender-pale" : "bg-white"}`}>
                 <Pressable className="min-h-60" onPress={() => {setShowForm(true); setDateForm(jour.date)}}>
                     <View className="flex-row items-center justify-between mb-3">
-                        <Text
-                        className={`text-[12px] font-bold uppercase tracking-wide ${
-                            estAujourdhui ? "text-violet-deep" : "text-ink-faint"
-                        }`}
-                        >
+                        <Text className={`text-[12px] font-bold uppercase tracking-wide ${estAujourdhui ? "text-violet-deep" : "text-ink-faint"}`}>
                         {nomAffiche}
                         </Text>
                         {estAujourdhui && (
-                        <View className="w-1.5 h-1.5 rounded-full bg-violet" />
+                          <View className="w-1.5 h-1.5 rounded-full bg-violet" />
                         )}
                     </View>
 
@@ -97,9 +98,9 @@ export function MainPlanning() {
                     </Text>
                     {jour.child.map((child, index) => (
                         <View key={index}>
-                            <View className={`w-full py-1 mt-1 flex-row justify-between rounded pr-1 bg-[${child.avatarColor}] `}>
-                                <Text className=" ml-1 font-semibold text-white">{child.firstname} {child.lastname}</Text>
-                                <Text className=" ml-1 font-semibold text-white">{child.plannedStartTime?.slice(0, 5)} - {child.plannedEndTime?.slice(0, 5)}</Text>
+                            <View className={`w-full py-1 mt-1 justify-between rounded pr-1 bg-[${child.avatarColor}] `}>
+                                <Text className=" ml-1 font-inter-semibold text-white text-[11px]">{child.firstname} {child.lastname}</Text>
+                                <Text className=" ml-1 font-inter-semibold text-white">{child.plannedStartTime?.slice(0, 5)} - {child.plannedEndTime?.slice(0, 5)}</Text>
                             </View>
                         </View>
                     ))}
@@ -116,7 +117,7 @@ export function MainPlanning() {
           );
         })}
       </View>
-      <PlanningForm visible={showForm} date={dateForm} onClose={() => setShowForm(false)} />
+      <PlanningForm visible={showForm} date={dateForm} onPlanningChange={handleRefresh} onClose={() => setShowForm(false)} />
         <View className="h-100">
         </View>
     </View>
