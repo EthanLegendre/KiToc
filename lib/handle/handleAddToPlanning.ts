@@ -1,4 +1,5 @@
 import { supabase } from "../supabase";
+import { format } from "date-fns";
 
 export async function handleAddToPlanning(idKid: string, heureDebut: Date, heureFin: Date, date: Date)
 {
@@ -6,7 +7,7 @@ export async function handleAddToPlanning(idKid: string, heureDebut: Date, heure
         .from("planning")
         .insert({
             enfant_id: idKid,
-            date: date.toISOString(),
+            date: format(date, "yyyy-MM-dd"),
             heure_debut_prevue: heureDebut.toTimeString().split(" ")[0],
             heure_fin_prevue: heureFin.toTimeString().split(" ")[0]
         });

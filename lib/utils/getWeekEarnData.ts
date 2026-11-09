@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase"
 import { getWeekDates } from "@/lib/time/getWeekDates"
 import { calculeTimeMinute } from "@/lib/utils/calculeTimeHour"
 import { endOfDay, startOfDay } from "date-fns"
+import { format } from "date-fns"
 
 export async function getWeekEarnData() {
   const { data: { user }, error: errorGetUser } = await supabase.auth.getUser();
@@ -48,8 +49,8 @@ export async function getWeekEarnData() {
           .from("session_garde")
           .select("*")
           .eq("enfant_id", child.id)
-          .gte("updated_at", startDay.toISOString())
-          .lte("updated_at", endDay.toISOString());
+          .gte("updated_at", format(startDay, "yyyy-MM-dd"))
+          .lte("updated_at", format(endDay, "yyyy-MM-dd"));
 
         if (!session || errorgetSession) return;
 

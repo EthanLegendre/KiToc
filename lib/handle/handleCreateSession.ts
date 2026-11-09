@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { stopSession } from "@/lib/handle/handleStopSession"
+import { format } from "date-fns";
 
 export async function handleCreateSession(enfantId: string, stop: boolean, codePin: string)
 {
@@ -24,7 +25,7 @@ export async function handleCreateSession(enfantId: string, stop: boolean, codeP
   if (!stop) {
     const { data, error } = await supabase.from("session_garde").insert({
       enfant_id: enfantId,
-      date: currentDate.toISOString().split("T")[0],
+      date: format(currentDate, "yyyy-MM-dd"),
       heure_debut: currentDate.toTimeString().split(" ")[0],
       status: "en_cours"
     }).select().single();

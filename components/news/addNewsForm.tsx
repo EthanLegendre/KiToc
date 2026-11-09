@@ -10,7 +10,7 @@ import { ActivityIndicator, Image, Modal, Pressable, ScrollView, Text, TextInput
 import { VoiceRecorder } from "./voiceRecoder";
 import { Child } from "@/types/enfant";
 import { fetchAssmatKids } from "@/lib/fetch/fetchAssmatKids";
-import { TITLE_NEWS_EXEMPLES, DESCRIPTION_NEWS_EXEMPLES, TITLES_EXEMPLE_TIME, TITLE_ALL_NEWS_EXEMPLES } from "@/lib/constants";
+import { TITLE_NEWS_EXEMPLES, DESCRIPTION_NEWS_EXEMPLES, TITLE_ALL_NEWS_EXEMPLES } from "@/lib/constants";
 import { checkKidInSession } from "@/lib/check/checkKidInSession";
 import { fetchKidSessions } from "@/lib/fetch/fetchKidSessions";
 

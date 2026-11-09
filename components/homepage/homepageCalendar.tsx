@@ -7,10 +7,11 @@ import { PlanningDay } from "@/types/planning";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable } from "react-native";
 import { router } from "expo-router";
+import { format } from "date-fns";
 
 export function groupPlanningByDay(entries: PlanningDay[], week: Date[]) {
   return week.map((date) => {
-    const dateStr = date.toISOString().split("T")[0];
+    const dateStr = format(date, "yyyy-MM-dd");
     const enfantsCeJour = entries.filter((entry) => entry.date === dateStr);
 
     return {
@@ -26,8 +27,8 @@ export function groupPlanningByDay(entries: PlanningDay[], week: Date[]) {
 
 export function HomepageCalendar() {
   const week = getDateOfWeek();
-  const debut = week[0].toISOString().split("T")[0];
-  const fin = week[6].toISOString().split("T")[0];
+  const debut = format(week[0], "yyyy-MM-dd");
+  const fin = format(week[6], "yyyy-MM-dd");
   const [weekKid, setWeekKid] = useState<PlanningDay[] | null>(null);
 
   useEffect(() => {

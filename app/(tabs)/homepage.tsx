@@ -42,10 +42,9 @@ export default function Homepage() {
   if (!valideSession) return null;
 
   return (
-    <View>
-      <HomepageBackground></HomepageBackground>
-      <ScrollView style={{ paddingTop: insets.top }} className="flex-1 bg-white" contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}>
-        
+    <View style={{ flex: 1 }}>
+      <HomepageBackground />
+      <ScrollView style={{ flex: 1, paddingTop: insets.top }} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}>
         <View className="mx-6">
           <TopLogo/>
           <HomepageClock/>

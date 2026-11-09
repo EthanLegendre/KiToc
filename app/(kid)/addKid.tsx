@@ -9,7 +9,7 @@ import { TopLogo } from "@/components/topLogo";
 import { AddKidForm } from "@/components/kid/addKidForm";
 
 
-export default function AddKidPage() {
+export default function App() {
     const insets = useSafeAreaInsets();
 
     return (

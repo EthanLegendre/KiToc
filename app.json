@@ -5,9 +5,8 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/toctoc-icon.png",
-    "scheme": "KiToc",
+    "scheme": "kitoc",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.AssmatApp"
@@ -19,9 +18,14 @@
         "backgroundImage": "./assets/images/toctoc-icon.png",
         "monochromeImage": "./assets/images/toctoc-icon.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.AssmatApp"
+      "package": "com.anonymous.AssmatApp",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "output": "single",
@@ -51,11 +55,19 @@
         {
           "microphonePermission": "Toctoc a besoin d'accéder au micro pour enregistrer un message vocal."
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "32d2e958-9d7f-45b5-9179-49e2da6c9782"
+      }
+    },
+    "owner": "eyzen1234"
   }
 }

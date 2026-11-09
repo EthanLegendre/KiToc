@@ -3,7 +3,7 @@ import { handleDeleteKid } from "@/lib/handle/handleDeleteKid";
 import { handleCreateSession } from "@/lib/handle/handleCreateSession";
 import { Child } from "@/types/enfant";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, Text, View, TextInput, ActivityIndicator } from "react-native";
 import { AddNewsForm } from "../news/addNewsForm";
@@ -23,6 +23,7 @@ export function KidInfo({ child, onClose, onSessionChange }: Props) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [haveTutor, setHaveTutor] = useState(false);
+  const router = useRouter();
 
   async function manageSession() {
     setLoading(true);
@@ -150,7 +151,7 @@ export function KidInfo({ child, onClose, onSessionChange }: Props) {
                 {isInSession ? (<Text className="text-ink-soft text-[12px] mt-1">Text, vocal ou photo</Text>) : (<View className="flex-row items-center mt-1"><Ionicons name="alert-circle-outline"  size={10}/><Text className="text-ink-faint  ml-1 text-[9px] font-inter-semibold">Aucune session lancée pour cet enfant</Text></View>)}
               </View>
             </Pressable>
-            <Pressable className="flex-row items-center mt-10 border-b-[1px] pb-6 border-b-[#EFE3F3]" onPress={() => {router.replace(`/editKid?id=${child.id}`); onClose()}}>
+            <Pressable className="flex-row items-center mt-10 border-b-[1px] pb-6 border-b-[#EFE3F3]" onPress={() => {router.push({ pathname: "/editKid", params: { id: child.id } }); onClose()}}>
               <View className="bg-[#EFE3F3] rounded-[7px] p-3">
                 <Ionicons name="create-outline" size={16} color={"#424242"} />
               </View>
